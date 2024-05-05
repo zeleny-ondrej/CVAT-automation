@@ -1,12 +1,29 @@
 # Welcome to CVAT-automation!
 
-This project presents a simple solution for fetching jobs within the CVAT rest api server and generates CSV file with each individual user with its assigned jobs. 
 
-# Requirements
-    Python 3.10
-    cvat_sdk 2.12.1
+## Description
 
-# Setting up test server using Docker:
+This project presents a simple solution for fetching jobs within the CVAT rest api server and generates CSV file with each individual user with its assigned jobs. Each script run generate unique subdirectory (based on current datetime) within the "assignments" directory (created by the script) and saves jobs of individual assignees into separate .csv file based on assignees' id. All unassigned jobs are saved into "Unassigned.csv" file.
+
+
+
+
+## Requirements
+      Python 3.10
+      cvat_sdk~=2.12.1
+      attrs~=23.2.0
+      pillow~=10.3.0
+      python-dateutil~=2.9.0.post0
+      requests~=2.31.0
+      packaging~=24.0
+      tqdm~=4.66.4
+      urllib3~=2.2.1
+      setuptools~=68.2.0
+      typing_extensions~=4.11.0
+      platformdirs~=4.2.1
+      pandas~=2.2.2
+
+## Setting up test server using Docker:
 1. Install Docker from official [website](https://www.docker.com/get-started/).
 2. Install required version of Python from official [website](https://www.python.org/downloads/).
 3. Install all missing packages using:
@@ -22,6 +39,8 @@ This project presents a simple solution for fetching jobs within the CVAT rest a
 
    * Here the *-p* argument defined port on which the server will be available. In case you choose different port, remember to change it within the script.
    * In this case the server is running at *(http://localhost:8080)*.
+
+
 
 
 
