@@ -1,30 +1,29 @@
-from cvat_sdk.api_client import Configuration, ApiClient, exceptions
 import argparse
 import os
 from pathlib import Path
 import datetime
 import pandas as pd
+import logging
+from Lib.retrieve import Retrieve
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s",
+    filename="get_jobs.log",
+    filemode="w",
+)
 
 
 def main(configuration):
-    # Configuration, for testing purposes the authentication is OFF
-    config = Configuration(
-        host=configuration["host"],
-        # username='YOUR_USERNAME',
-        # password='YOUR_PASSWORD'
+    logging.info(f"Host address: {configuration['host']}.")
+    retriever = Retrieve(
+        hostname=configuration["host"],
+        username=configuration["username"],
+        password=configuration["password"],
     )
-    with ApiClient(config) as api_client:
+    jobs = retriever.get_jobs()
 
-        try:
-            # Query list of all jobs
-            (data, response) = api_client.jobs_api.list()
-        except exceptions.ApiException as e:
-            # Catch exceptions
-            print("Exception when trying to read list of jobs: %s\n" % e)
-
-        jobs = data["results"]
-
-    print(f"Total of {len(jobs)} jobs found.")
+    logging.info(f"Total of {len(jobs)} jobs found.")
 
     # Create a directory for "todays" jobs
     save_dir = Path("assignments")
@@ -33,6 +32,7 @@ def main(configuration):
     datetime_now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S.%f")
     save_dir = save_dir / Path(datetime_now)
     os.mkdir(save_dir)
+    logging.info(f"Saving jobs to {save_dir}")
 
     # Dictionary of assignee (keys)-jobs(values)
     # https://docs.cvat.ai/docs/api_sdk/sdk/reference/models/job-read/
@@ -50,14 +50,14 @@ def main(configuration):
 
     users = len(assignments)
     users += -1 if "Unassigned" in assignments.keys() else 0
-    print(f"\tAssigned to {users} users.")
-
     unassigned = (
         len(assignments["Unassigned"])
         if "Unassigned" in assignments.keys()
         else 0
     )
-    print(f"\t{unassigned} unassigned jobs.")
+    logging.info(
+        f"Found {users} with assigned jobs. {unassigned} jobs are unassigned."
+    )
 
     for assignee in assignments.keys():
         k = pd.DataFrame.from_records(assignments[assignee])
@@ -70,8 +70,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "--host",
         type=str,
-        default="http://localhost:8080/",
+        default="http://localhost:808/",
         help="Address of the REST API",
+    )
+    parser.add_argument(
+        "--username",
+        type=str,
+        default=None,
+        help="Username with access to the REST API",
+    )
+    parser.add_argument(
+        "--password",
+        type=str,
+        default=None,
+        help="Password to the REST API",
     )
     arguments = vars(parser.parse_args())
     main(arguments)
